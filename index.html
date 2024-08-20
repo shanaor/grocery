@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Store</title>
+    <style>
+        body {
+            background-image: url('https://www.example.com/food-background.jpg'); /* תחליף את ה-URL עם כתובת תמונה לרקע */
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .category-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .category-buttons button {
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-buttons button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-list {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-list ol {
+            list-style: none;
+            padding: 0;
+        }
+
+        .product-list li {
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .product-list li:hover {
+            background-color: #ffe4b5;
+            transform: translateX(5px);
+        }
+
+        .product-list li button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .product-list li button:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+
+        #carte, #itemCount, #cheapest, #mostExpensive, #average {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px auto;
+            width: fit-content;
+            font-size: 18px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        #carte:hover, #itemCount:hover, #cheapest:hover, #mostExpensive:hover, #average:hover {
+            transform: scale(1.05);
+        }
+
+        .animated {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .category-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to the Grocery Store</h1>
+
+    <div class="category-buttons">
+        <button onclick="prod('Dairy')">Dairy</button>
+        <button onclick="prod('Bakery')">Bakery</button>
+        <button onclick="prod('Fruits')">Fruits</button>
+        <button onclick="prod('Meat')">Meat</button>
+        <button onclick="prod('Beverages')">Beverages</button>
+        <button onclick="prod('Vegetables')">Vegetables</button>
+        <button onclick="prod('Pantry')">Pantry</button>
+    </div>
+
+    <div id="producte" class="product-list animated"></div>
+    <br>
+    <div>Cart List:</div>
+    <ol id="lis" class="animated"></ol>
+    <div id="carte" class="animated">Cart Total: $0.00</div>
+    <div id="itemCount" class="animated">Total Items in Cart: 0</div>
+    <div id="cheapest" class="animated">Cheapest Item: N/A</div>
+    <div id="mostExpensive" class="animated">Most Expensive Item: N/A</div>
+    <div id="average" class="animated">Average Price: $0.00</div>
+
+    <script>
+        let tot = 0;
+        let itemCount = 0;
+        let lisi = document.getElementById("lis");
+        let producter = document.getElementById("producte");
+        let carten = document.getElementById("carte");
+        let itemCountDisplay = document.getElementById("itemCount");
+        let cheapestItemDisplay = document.getElementById("cheapest");
+        let mostExpensiveItemDisplay = document.getElementById("mostExpensive");
+        let averagePriceDisplay = document.getElementById("average");
+        let cartItems = {}; // אובייקט לשמירת הפריטים והכמויות שלהם בעגלה
+
+        let groceries = [
+            { "item": "Milk", "category": "Dairy", "price": 3.50 },
+            { "item": "Eggs", "category": "Dairy", "price": 2.99 },
+            { "item": "Cheese", "category": "Dairy", "price": 5.00 },
+            { "item": "Butter", "category": "Dairy", "price": 4.00 },
+            { "item": "Bread", "category": "Bakery", "price": 2.50 },
+            { "item": "Apples", "category": "Fruits", "price": 1.20 },
+            { "item": "Chicken Breast", "category": "Meat", "price": 7.50 },
+            { "item": "Orange Juice", "category": "Beverages", "price": 3.00 },
+            { "item": "Tomatoes", "category": "Vegetables", "price": 1.80 },
+            { "item": "Pasta", "category": "Pantry", "price": 1.50 },
+        ]
+
+        function prod(categ) {
+            producter.innerHTML = "<ol>" + groceries.filter(item => item.category == categ).map(items => `<li><button onclick="addToCart(${items.price}, '${items.item}')">${items.item}</button> $${items.price.toFixed(2)}</li>`).join("") + "</ol>";
+        }
+
+        function addToCart(price, item) {
+            tot += price;
+            itemCount += 1; // העלאת מספר הפריטים בעגלה
+            carten.innerHTML = `Cart Total: $${tot.toFixed(2)}`;
+
+            // בדיקה אם הפריט כבר בעגלה
+            if (cartItems[item]) {
+                cartItems[item].quantity += 1; // אם הפריט בעגלה, להגדיל את הכמות
+            } else {
+                cartItems[item] = { price: price, quantity: 1 }; // אם הפריט לא בעגלה, להוסיף אותו
+            }
+
+            updateCartList();
+            updateAveragePrice();
+            updateItemCount();
+            updateCheapestAndMostExpensive();
+        }
+
+        function updateCartList() {
+            lisi.innerHTML = ""; // לנקות את הרשימה לפני יצירתה מחדש
+            for (let item in cartItems) {
+                lisi.innerHTML += `<li>${cartItems[item].quantity} x ${item} - $${(cartItems[item].price * cartItems[item].quantity).toFixed(2)}</li>`;
+            }
+        }
+
+        function updateAveragePrice() {
+            let averagePrice = tot / itemCount;
+            averagePriceDisplay.innerHTML = `Average Price: $${averagePrice.toFixed(2)}`;
+        }
+
+        function updateItemCount() {
+            itemCountDisplay.innerHTML = `Total Items in Cart: ${itemCount}`;
+        }
+
+        function updateCheapestAndMostExpensive() {
+            let cheapestItem = null;
+            let mostExpensiveItem = null;
+
+            for (let item in cartItems) {
+                if (!cheapestItem || cartItems[item].price < cheapestItem.price) {
+                    cheapestItem = cartItems[item];
+                    cheapestItem.name = item; // שמירת שם המוצר
+                }
+                if (!mostExpensiveItem || cartItems[item].price > mostExpensiveItem.price) {
+                    mostExpensiveItem = cartItems[item];
+                    mostExpensiveItem.name = item; // שמירת שם המוצר
+                }
+            }
+
+            cheapestItemDisplay.innerHTML = `Cheapest Item: ${cheapestItem.name} - $${cheapestItem.price.toFixed(2)}`;
+            mostExpensiveItemDisplay.innerHTML = `Most Expensive Item: ${mostExpensiveItem.name} - $${mostExpensiveItem.price.toFixed(2)}`;
+        }
+    </script>
+</body>
+
+</html>
